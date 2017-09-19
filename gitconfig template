@@ -1,0 +1,36 @@
+# This is Git's per-user configuration file.
+[user]
+	name = 
+	email = 
+[alias]
+
+  ##################################### switch branch
+	co = checkout
+  
+  ##################################### amend last commit 
+	amd = commit --amend
+  
+  ##################################### nicley log last 10 commits to console 
+	lg = log -n 10 --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  
+  ##################################### create empty commit 
+	empty = commit --allow-empty -m'empty commit'
+  
+  ##################################### discard current changes
+	dsd = checkout -- .
+  
+  ##################################### push to origin for the first time, without typing set upstream option 
+	pusho = "!git push -u origin \"$(git rev-parse --abbrev-ref HEAD)\""
+  
+  ##################################### fetch master without changing branch
+	fm = "!git fetch origin master:master"
+[core]
+
+  ##################################### use notepad++ as default editor 
+	editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
+[diff]
+    tool = default-difftool
+[difftool "default-difftool"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+[credential]
+	helper = wincred
