@@ -10,7 +10,7 @@
   ##################################### amend last commit 
 	amd = commit --amend
   
-  ##################################### nicley log last 10 commits to console 
+  ##################################### niceley log last 10 commits to console 
 	lg = log -n 10 --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   
   ##################################### create empty commit 
@@ -24,13 +24,31 @@
   
   ##################################### fetch master without changing branch
 	fm = "!git fetch origin master:master"
+	
+  ##################################### fetch master without changing branch	
+	lgr = log --pretty=oneline --graph --decorate --all
+	unset = branch --unset-upstream
+	fo = "!f() { git fetch origin $1:$1; }; f"
+	current = rev-parse --abbrev-ref HEAD
+	rename = "!f() { git branch -m $1; }; f"
+	repos = "C:\\workspace\\source"
+	ignore = "!f() { git update-index --assume-unchanged $1; }; f"
+	unignore = "!f() { git update-index --no-assume-unchanged $1; }; f"
+	ignored = !git ls-files -v | grep ^[a-z]
 [core]
 
   ##################################### use notepad++ as default editor 
-	editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
+  ##	editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
+	
+  ##################################### use vs code as default editor 	
+	editor = code -n --wait
 [diff]
     tool = default-difftool
 [difftool "default-difftool"]
     cmd = code --wait --diff $LOCAL $REMOTE
+[merge]
+    tool = vscode
+[mergetool "vscode"]
+    cmd = code -n --wait $MERGED
 [credential]
 	helper = wincred
