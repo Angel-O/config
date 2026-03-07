@@ -3,64 +3,6 @@
 	name = 
 	email = 
 [alias]
-
-  ##################################### switch branch
-	co = checkout
-  
-  ##################################### amend last commit 
-	amd = commit --amend
-  
-  ##################################### niceley log last 10 commits to console 
-	lg = log -n 10 --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-  
-  ##################################### create empty commit 
-	empty = commit --allow-empty -m'empty commit'
-  
-  ##################################### discard current changes
-	dsd = checkout -- .
-  
-  ##################################### push to origin for the first time, without typing set upstream option 
-	pusho = "!git push -u origin \"$(git rev-parse --abbrev-ref HEAD)\""
-  
-  ##################################### fetch master without changing branch
-	fm = "!git fetch origin master:master"
-	
-  ##################################### fetch master without changing branch	
-	lgr = log --pretty=oneline --graph --decorate --all
-	unset = branch --unset-upstream
-	fo = "!f() { git fetch origin $1:$1; }; f"
-	current = rev-parse --abbrev-ref HEAD
-	rename = "!f() { git branch -m $1; }; f"
-	repos = "C:\\workspace\\source"
-	ignore = "!f() { git update-index --assume-unchanged $1; }; f"
-	unignore = "!f() { git update-index --no-assume-unchanged $1; }; f"
-	ignored = !git ls-files -v | grep ^[a-z]
-[core]
-
-  ##################################### use notepad++ as default editor 
-  ##	editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
-	
-  ##################################### use vs code as default editor 	
-	editor = code -n --wait
-[diff]
-    tool = default-difftool
-[difftool "default-difftool"]
-    cmd = code --wait --diff $LOCAL $REMOTE
-[merge]
-    tool = vscode
-[mergetool "vscode"]
-    cmd = code -n --wait $MERGED
-[credential]
-	helper = wincred
-	
-	
-############################################################# LATEST VERSION
-
-# This is Git's per-user configuration file.
-[user]
-	name = 
-	email = 
-[alias]
 	co = checkout
 	amd = commit --amend
 	lg = log -n 10 --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -77,6 +19,12 @@
 	ignore = "!f() { git update-index --assume-unchanged $1; }; f"
 	unignore = "!f() { git update-index --no-assume-unchanged $1; }; f"
 	ignored = !git ls-files -v | grep ^[a-z]
+	wt = worktree
+	wtl = worktree list
+	wtp = worktree prune
+	wtr = worktree remove
+	wtb = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add \"../${repo}-worktrees/$1\" \"$1\"; }; f"
+	wtbn = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add -b \"$1\" \"../${repo}-worktrees/$1\" \"${2:-origin/main}\"; }; f"
 [core]
 	# editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
 	# editor = "\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" -nosession --wait %*"
