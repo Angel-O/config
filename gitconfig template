@@ -46,13 +46,10 @@
 	wtp = worktree prune
 
   ##################################### remove a matching worktree under ../<repo>-worktrees/<branch>
-	wtr = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
+	wtrm = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
 
-  ##################################### add a worktree for a local branch, or for an already-fetched origin/<branch>
-	wtb = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtb: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; }; f"
-
-  ##################################### create a new branch and matching worktree under ../<repo>-worktrees/<branch>
-	wtbn = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add -b \"$1\" \"../${repo}-worktrees/$1\" \"${2:-origin/main}\"; }; f"
+  ##################################### checkout an existing branch into a worktree, or use -b to create a new branch first
+	wtco = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); if [ \"$1\" = \"-b\" ]; then branch=\"$2\"; base=\"${3:-origin/main}\"; path=\"../${repo}-worktrees/${branch}\"; git worktree add -b \"$branch\" \"$path\" \"$base\"; else branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; fi; }; f"
 [core]
 
   ##################################### use notepad++ as default editor
@@ -98,9 +95,8 @@
 	wt = worktree
 	wtl = worktree list
 	wtp = worktree prune
-	wtr = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
-	wtb = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtb: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; }; f"
-	wtbn = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add -b \"$1\" \"../${repo}-worktrees/$1\" \"${2:-origin/main}\"; }; f"
+	wtrm = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
+	wtco = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); if [ \"$1\" = \"-b\" ]; then branch=\"$2\"; base=\"${3:-origin/main}\"; path=\"../${repo}-worktrees/${branch}\"; git worktree add -b \"$branch\" \"$path\" \"$base\"; else branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; fi; }; f"
 [core]
 	# editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
 	# editor = "\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" -nosession --wait %*"

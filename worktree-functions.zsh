@@ -2,9 +2,8 @@
 # the gitconfig template.
 alias gwtl='git wtl'
 alias gwtp='git wtp'
-alias gwtb='git wtb'
-alias gwtbn='git wtbn'
-alias gwtr='git wtr'
+alias gwtco='git wtco'
+alias gwtrm='git wtrm'
 
 # cd into the directory associated to the given worktree. Assumes the
 # worktree lives in a sibling directory suffixed with `-worktrees`.
