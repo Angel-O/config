@@ -45,8 +45,8 @@
   ##################################### prune stale worktree metadata
 	wtp = worktree prune
 
-  ##################################### remove a worktree by path
-	wtr = worktree remove
+  ##################################### remove a matching worktree under ../<repo>-worktrees/<branch>
+	wtr = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
 
   ##################################### add a worktree for an existing branch under ../<repo>-worktrees/<branch>
 	wtb = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add \"../${repo}-worktrees/$1\" \"$1\"; }; f"
@@ -98,7 +98,7 @@
 	wt = worktree
 	wtl = worktree list
 	wtp = worktree prune
-	wtr = worktree remove
+	wtr = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
 	wtb = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add \"../${repo}-worktrees/$1\" \"$1\"; }; f"
 	wtbn = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree add -b \"$1\" \"../${repo}-worktrees/$1\" \"${2:-origin/main}\"; }; f"
 [core]
