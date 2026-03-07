@@ -7,7 +7,10 @@ alias gwtrm='git wtrm'
 # Create or attach the requested worktree via `git wtco`, then cd into it so
 # the command feels closer to `gco` in day-to-day use.
 gwtco() {
-  local branch
+  local top repo branch worktree_path
+
+  top=$(command git rev-parse --show-toplevel) || return
+  repo="${top:t}"
 
   if [ "$1" = "-b" ]; then
     branch="$2"
@@ -15,15 +18,23 @@ gwtco() {
     branch="$1"
   fi
 
-  git wtco "$@" || return
-  cdwt "$branch" || return
+  worktree_path="../${repo}-worktrees/${branch}"
+
+  if [ -d "$worktree_path" ]; then
+    cd "$worktree_path" || return
+    return
+  fi
+
+  command git wtco "$@" || return
+  cd "$worktree_path" || return
 }
 
 # cd into the directory associated to the given worktree. Assumes the
 # worktree lives in a sibling directory suffixed with `-worktrees`.
 cdwt() {
-  local repo
-  repo=$(basename "$(git rev-parse --show-toplevel)") || return
+  local top repo
+  top=$(command git rev-parse --show-toplevel) || return
+  repo="${top:t}"
   cd "../${repo}-worktrees/$1" || return
 }
 
