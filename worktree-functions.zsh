@@ -57,7 +57,7 @@ gwts() {
         printf "(detached)\t%s\n", path
       }
     ' | "$fzf_bin" \
-      --height=40% \
+      --height=~10 \
       --reverse \
       --border \
       --prompt='Worktree> ' \
