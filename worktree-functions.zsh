@@ -29,6 +29,52 @@ gwtco() {
   cd "$worktree_path" || return
 }
 
+# Interactively select a worktree with fzf and cd into it. Requires fzf to be
+# installed and available either on PATH or via the default Homebrew location.
+gwts() {
+  local selected worktree_path fzf_bin
+
+  if command -v fzf >/dev/null 2>&1; then
+    fzf_bin=$(command -v fzf)
+  elif [ -x /opt/homebrew/bin/fzf ]; then
+    fzf_bin=/opt/homebrew/bin/fzf
+  else
+    printf 'gwts: fzf is not installed. Install it with: brew install fzf\n' >&2
+    return 1
+  fi
+
+  selected=$(
+    command git worktree list --porcelain | awk '
+      /^worktree / {
+        path = substr($0, 10)
+      }
+      /^branch / {
+        branch = $2
+        sub(/^refs\/heads\//, "", branch)
+        printf "%s\t%s\n", branch, path
+      }
+      /^detached$/ {
+        printf "(detached)\t%s\n", path
+      }
+    ' | "$fzf_bin" \
+      --height=40% \
+      --reverse \
+      --border \
+      --prompt='Worktree> ' \
+      --info='inline-right:?: toggle preview  ' \
+      --no-separator \
+      --bind 'pgup:preview-page-up,pgdn:preview-page-down,ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down,?:toggle-preview' \
+      --delimiter=$'\t' \
+      --with-nth=1 \
+      --preview-window='right:60%' \
+      --preview-label=' ctrl-u/d: scroll preview ' \
+      --preview 'printf "Path: %s\n\n" {2}; git -C {2} status --short --branch'
+  ) || return
+
+  worktree_path="${selected#*$'\t'}"
+  cd "$worktree_path" || return
+}
+
 # cd into the directory associated to the given worktree. Assumes the
 # worktree lives in a sibling directory suffixed with `-worktrees`.
 cdwt() {
