@@ -4,13 +4,34 @@ alias gwtl='git wtl'
 alias gwtp='git wtp'
 alias gwtrm='git wtrm'
 
+_gwt_main_path() {
+  command git rev-parse --git-common-dir >/dev/null || return
+  command git worktree list --porcelain | command awk '/^worktree / { print substr($0, 10); exit }'
+}
+
+_gwt_path_for_branch() {
+  command git rev-parse --git-common-dir >/dev/null || return
+  command git for-each-ref --format='%(worktreepath)' "refs/heads/$1"
+}
+
+_gwt_branch_slug() {
+  local slug
+  slug=$(printf '%s' "$1" | LC_ALL=C command tr '[:upper:]' '[:lower:]' | command sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+  printf '%s\n' "${slug:-worktree}"
+}
+
+_gwt_default_path() {
+  local main repo slug
+  main=$(_gwt_main_path) || return
+  repo="${main:t}"
+  slug=$(_gwt_branch_slug "$1") || return
+  printf '%s\n' "$HOME/workspace/worktrees/$repo/$slug"
+}
+
 # Create or attach the requested worktree via `git wtco`, then cd into it so
 # the command feels closer to `gco` in day-to-day use.
 gwtco() {
-  local top repo branch worktree_path
-
-  top=$(command git rev-parse --show-toplevel) || return
-  repo="${top:t}"
+  local branch worktree_path
 
   if [ "$1" = "-b" ]; then
     branch="$2"
@@ -18,13 +39,18 @@ gwtco() {
     branch="$1"
   fi
 
-  worktree_path="../${repo}-worktrees/${branch}"
+  if [ -z "$branch" ]; then
+    printf 'usage: gwtco [-b] <branch> [base]\n' >&2
+    return 1
+  fi
 
-  if [ -d "$worktree_path" ]; then
+  worktree_path=$(_gwt_path_for_branch "$branch") || return
+  if [ -n "$worktree_path" ]; then
     cd "$worktree_path" || return
     return
   fi
 
+  worktree_path=$(_gwt_default_path "$branch") || return
   command git wtco "$@" || return
   cd "$worktree_path" || return
 }
@@ -75,31 +101,20 @@ gwts() {
   cd "$worktree_path" || return
 }
 
-# cd into the directory associated to the given worktree. Assumes the
-# worktree lives in a sibling directory suffixed with `-worktrees`.
+# cd into the worktree associated with the given branch.
 cdwt() {
-  local top repo
-  top=$(command git rev-parse --show-toplevel) || return
-  repo="${top:t}"
-  cd "../${repo}-worktrees/$1" || return
+  local worktree_path
+  worktree_path=$(_gwt_path_for_branch "$1") || return
+  if [ -z "$worktree_path" ]; then
+    printf 'cdwt: no worktree found for branch %s\n' "$1" >&2
+    return 1
+  fi
+  cd "$worktree_path" || return
 }
 
-# cd back into the project the worktree was created from. Assumes the same
-# folder structure and naming convention as `cdwt`, and is intended to be run
-# from inside a repo located under a `*-worktrees` directory.
+# cd back into the repository's main worktree.
 cdmain() {
-  local top parent base
-  top=$(git rev-parse --show-toplevel) || return
-  parent=$(dirname "$top")
-  base=$(basename "$parent")
-
-  case "$base" in
-    *-worktrees)
-      cd "$(dirname "$parent")/${base%-worktrees}" || return
-      ;;
-    *)
-      printf 'cdmain: current repo is not inside a *-worktrees directory\n' >&2
-      return 1
-      ;;
-  esac
+  local main
+  main=$(_gwt_main_path) || return
+  cd "$main" || return
 }
