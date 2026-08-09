@@ -45,11 +45,11 @@
   ##################################### prune stale worktree metadata
 	wtp = worktree prune
 
-  ##################################### remove a matching worktree under ../<repo>-worktrees/<branch>
-	wtrm = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
+  ##################################### remove the worktree currently registered for a branch
+	wtrm = "!f() { branch=$1; if [ -z \"$branch\" ]; then printf 'usage: git wtrm <branch>\n' >&2; return 1; fi; path=$(git for-each-ref --format='%(worktreepath)' \"refs/heads/$branch\"); if [ -z \"$path\" ]; then printf 'wtrm: no worktree found for branch %s\n' \"$branch\" >&2; return 1; fi; git worktree remove \"$path\"; }; f"
 
-  ##################################### checkout an existing branch into a worktree, or use -b to create a new branch first
-	wtco = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); if [ \"$1\" = \"-b\" ]; then branch=\"$2\"; base=\"${3:-origin/main}\"; path=\"../${repo}-worktrees/${branch}\"; git worktree add -b \"$branch\" \"$path\" \"$base\"; else branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; fi; }; f"
+  ##################################### checkout a branch under ~/workspace/worktrees/<repo>/<branch-slug>
+	wtco = "!f() { main=$(git worktree list --porcelain | awk '/^worktree / { print substr($0, 10); exit }'); repo=$(basename \"$main\"); if [ \"$1\" = \"-b\" ]; then branch=$2; base=${3:-origin/main}; else branch=$1; fi; if [ -z \"$branch\" ]; then printf 'usage: git wtco [-b] <branch> [base]\n' >&2; return 1; fi; slug=$(printf '%s' \"$branch\" | LC_ALL=C tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'); slug=${slug:-worktree}; path=\"$HOME/workspace/worktrees/$repo/$slug\"; mkdir -p \"$(dirname \"$path\")\" || return; if [ \"$1\" = \"-b\" ]; then git worktree add -b \"$branch\" \"$path\" \"$base\"; elif git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; }; f"
 [core]
 
   ##################################### use notepad++ as default editor
@@ -95,8 +95,8 @@
 	wt = worktree
 	wtl = worktree list
 	wtp = worktree prune
-	wtrm = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); git worktree remove \"../${repo}-worktrees/$1\"; }; f"
-	wtco = "!f() { repo=$(basename \"$(git rev-parse --show-toplevel)\"); if [ \"$1\" = \"-b\" ]; then branch=\"$2\"; base=\"${3:-origin/main}\"; path=\"../${repo}-worktrees/${branch}\"; git worktree add -b \"$branch\" \"$path\" \"$base\"; else branch=\"$1\"; path=\"../${repo}-worktrees/${branch}\"; if git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; fi; }; f"
+	wtrm = "!f() { branch=$1; if [ -z \"$branch\" ]; then printf 'usage: git wtrm <branch>\n' >&2; return 1; fi; path=$(git for-each-ref --format='%(worktreepath)' \"refs/heads/$branch\"); if [ -z \"$path\" ]; then printf 'wtrm: no worktree found for branch %s\n' \"$branch\" >&2; return 1; fi; git worktree remove \"$path\"; }; f"
+	wtco = "!f() { main=$(git worktree list --porcelain | awk '/^worktree / { print substr($0, 10); exit }'); repo=$(basename \"$main\"); if [ \"$1\" = \"-b\" ]; then branch=$2; base=${3:-origin/main}; else branch=$1; fi; if [ -z \"$branch\" ]; then printf 'usage: git wtco [-b] <branch> [base]\n' >&2; return 1; fi; slug=$(printf '%s' \"$branch\" | LC_ALL=C tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'); slug=${slug:-worktree}; path=\"$HOME/workspace/worktrees/$repo/$slug\"; mkdir -p \"$(dirname \"$path\")\" || return; if [ \"$1\" = \"-b\" ]; then git worktree add -b \"$branch\" \"$path\" \"$base\"; elif git show-ref --verify --quiet \"refs/heads/${branch}\"; then git worktree add \"$path\" \"$branch\"; elif git show-ref --verify --quiet \"refs/remotes/origin/${branch}\"; then git worktree add -b \"$branch\" \"$path\" \"origin/$branch\"; else printf 'wtco: branch %s not found locally or in refs/remotes/origin; fetch first if needed\n' \"$branch\" >&2; return 1; fi; }; f"
 [core]
 	# editor = "\"C:\\Program Files\\Notepad++\\notepad++.exe\" -multiInst -notabbar -nosession -noPlugin %*"
 	# editor = "\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" -nosession --wait %*"
